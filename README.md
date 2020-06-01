@@ -10,6 +10,17 @@ To run the server, run:
 npm start
 ```
 
+To run the server with docker-compose, run:
+
+```
+docker-compose up -d
+```
+
+You can specify the port by creating a .env file at the root folder, and adding the environment var:
+```
+TCD_SWAGGER=12345
+```
+
 To view the Swagger UI interface:
 
 ```
