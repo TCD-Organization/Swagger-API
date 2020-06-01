@@ -1,0 +1,7 @@
+version: '3'
+
+services:
+  swagger:
+    build: .
+    ports:
+      - "${TCD_SWAGGER:-8089}:8080"
