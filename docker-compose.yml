@@ -3,5 +3,6 @@ version: '3'
 services:
   swagger:
     build: .
+    image: 'tcd-swagger'
     ports:
       - "${TCD_SWAGGER:-8089}:8080"

@@ -1,0 +1,524 @@
+openapi: 3.0.1
+info:
+  title: TCD - JEE Server
+  contact: {}
+  version: 1.0-oas3
+servers:
+- url: 'http://51.178.18.199:8080'
+tags:
+- name: User
+- name: Admin
+- name: Runner
+- name: Document
+- name: Analysis
+paths:
+  /register:
+    post:
+      tags:
+      - User
+      summary: Register a User account
+      operationId: RegisterUser
+      requestBody:
+        description: Basic account informations
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterUserRequest'
+        required: true
+      responses:
+        "201":
+          description: Created
+      deprecated: false
+      x-swagger-router-controller: User
+  /login:
+    post:
+      tags:
+      - Admin
+      - User
+      summary: Authenticate and get a token
+      operationId: LoginUser
+      requestBody:
+        description: Autenticate with Username and password, and get a token
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginUserRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer {token}
+              style: simple
+              explode: false
+              schema:
+                type: string
+        "403":
+          description: Wrong Username or Password
+      deprecated: false
+      x-swagger-router-controller: Admin
+  /register/admin:
+    post:
+      tags:
+      - Admin
+      summary: Register an Admin User
+      operationId: RegisterAdmin
+      parameters:
+      - name: Authorization
+        in: header
+        description: An Admin token is required
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          default: Bearer {token}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterAdminRequest'
+        required: true
+      responses:
+        "201":
+          description: Created
+        "403":
+          description: Unauthorized
+      deprecated: false
+      x-swagger-router-controller: Admin
+  /document:
+    post:
+      tags:
+      - Document
+      summary: Create a new Document
+      operationId: CreateDocument
+      parameters:
+      - name: Authorization
+        in: header
+        description: A User or Admin token is required
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          default: Bearer {token}
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/body'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDocumentRequest'
+            examples:
+              Text:
+                value:
+                  name: my-roman
+                  genre: roman
+                  content_type: text
+                  content: Here lies a bunch a flower, on the side of the road
+              Link:
+                value:
+                  name: my-roman
+                  genre: roman
+                  content_type: link
+                  content: https://wwW.my-host.com/roman.txt
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatedDocumentRequest'
+        "403":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      deprecated: false
+      x-swagger-router-controller: Document
+  /document/{docId}/analysis:
+    post:
+      tags:
+      - Analysis
+      summary: Create a new Analysis
+      operationId: CreateAnalysis
+      parameters:
+      - name: Authorization
+        in: header
+        description: A User or Admin token is required
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          default: Bearer {token}
+      - name: docId
+        in: path
+        description: Numeric ID of document to get
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAnalysisRequest'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatedAnalysisRequest'
+        "403":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      deprecated: false
+      x-swagger-router-controller: Analysis
+  /document/{docId}/analysis/{analysisId}/accept:
+    post:
+      tags:
+      - Analysis
+      summary: Accept an Analysis
+      operationId: AcceptAnalysis
+      parameters:
+      - name: Authorization
+        in: header
+        description: A Runner token is required
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          default: Bearer {token}
+      - name: docId
+        in: path
+        description: Numeric ID of document
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      - name: analysisId
+        in: path
+        description: Numeric ID of analysis to accept
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: OK
+        "403":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      deprecated: false
+      x-swagger-router-controller: Analysis
+  /document/{docId}/analysis/{analysisId}:
+    post:
+      tags:
+      - Analysis
+      summary: Update an Analysis
+      operationId: UpdateAnalysis
+      parameters:
+      - name: Authorization
+        in: header
+        description: A Runner token is required
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          default: Bearer {token}
+      - name: docId
+        in: path
+        description: Numeric ID of document
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      - name: analysisId
+        in: path
+        description: Numeric ID of analysis to update
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAnalysisRequest'
+      responses:
+        "201":
+          description: Updated
+        "403":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      deprecated: false
+      x-swagger-router-controller: Analysis
+  /analysis-types:
+    get:
+      tags:
+      - Analysis
+      summary: Get the list of analysis types
+      operationId: GetAnalysisTypes
+      parameters:
+      - name: Authorization
+        in: header
+        description: A User or Admin token is required
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          default: Bearer {token}
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisTypesRequest'
+        "403":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      deprecated: false
+      x-swagger-router-controller: Analysis
+  /runner:
+    post:
+      tags:
+      - Runner
+      summary: Register a Runner
+      operationId: RegisterRunner
+      parameters:
+      - name: Authorization
+        in: header
+        description: An Admin token is required
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          default: Bearer {token}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRunnerRequest'
+        required: true
+      responses:
+        "201":
+          description: Created
+        "403":
+          description: Unauthorized
+      deprecated: false
+      x-swagger-router-controller: Runner
+  /login/runner:
+    post:
+      tags:
+      - Runner
+      summary: Authenticate and get a token
+      operationId: LoginRunner
+      requestBody:
+        description: Autenticate with Runnername and Key, and get a token
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRunnerRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer {token}
+              style: simple
+              explode: false
+              schema:
+                type: string
+        "403":
+          description: Wrong Runnername or Key
+      deprecated: false
+      x-swagger-router-controller: Runner
+  /runner/all:
+    get:
+      tags:
+      - Runner
+      summary: Get the list of runners
+      operationId: GetRunnerList
+      parameters:
+      - name: Authorization
+        in: header
+        description: A User or Admin token is required
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          default: Bearer {token}
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunnerListRequest'
+        "403":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      deprecated: false
+      x-swagger-router-controller: Runner
+components:
+  schemas:
+    RegisterUserRequest:
+      title: RegisterUserRequest
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        email:
+          type: string
+      example:
+        username: hello
+        password: test
+        email: test@testfr
+    LoginUserRequest:
+      title: LoginUserRequest
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      example:
+        username: hello
+        password: test
+    RegisterAdminRequest:
+      title: RegisterAdminRequest
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        email:
+          type: string
+      example:
+        username: admin
+        password: test
+        email: test@testfr
+    CreateDocumentRequest:
+      title: LoginAdminRequest
+      type: object
+      properties:
+        name:
+          type: string
+        genre:
+          type: string
+        content_type:
+          type: string
+        content:
+          type: string
+      example:
+        name: roman-de-bernard
+        genre: roman
+        content_type: text / link / file
+        content: here lies a flower / https://myurl.com/ / null
+    CreatedDocumentRequest:
+      title: CreatedDocumentRequest
+      type: object
+      properties:
+        document_id:
+          type: string
+      example:
+        document_id: 1a2b3c
+    CreateAnalysisRequest:
+      title: CreateAnalysisRequest
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: object
+      example:
+        name: analysis-on-roman-de-bernard
+        type: SEMANTIC_ANALYSIS
+    CreatedAnalysisRequest:
+      title: CreatedDocumentRequest
+      type: object
+      properties:
+        analysis_id:
+          type: string
+      example:
+        analysis_id: 1a2b3c
+    UpdateAnalysisRequest:
+      title: UpdateAnalysisRequest
+      type: object
+      properties:
+        status:
+          type: string
+        step_number:
+          type: string
+        step_name:
+          type: string
+        lasting_time:
+          type: number
+      example:
+        status: 1a2b3c
+        step_number: 1/3
+        step_name: DICTIONNARY_CHECK
+        lasting_time: 12312414
+    AnalysisTypesRequest:
+      title: UpdateAnalysisRequest
+      type: object
+      properties:
+        types:
+          type: string
+      example:
+        types:
+        - SEMANTIC_ANALYSIS
+        - OTHER...
+    RegisterRunnerRequest:
+      title: RegisterRunnerRequest
+      type: object
+      properties:
+        runnername:
+          type: string
+        key:
+          type: string
+      example:
+        runnername: my-runner
+        key: 139FB
+    RunnerListRequest:
+      title: RegisterRunnerRequest
+      type: object
+      properties:
+        runners:
+          type: array
+          items:
+            type: string
+      example:
+        runners:
+        - id: ObjectId()
+          runnername: my-runner
+          key: Encrypted()
+    body:
+      type: object
+      properties:
+        fileName:
+          type: string
+          format: binary
