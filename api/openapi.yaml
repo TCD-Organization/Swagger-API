@@ -157,7 +157,7 @@ paths:
         '500':
           description: 'Internal Server Error'
 
-  /runner/connect:
+  /login/runner:
     post:
       summary: 'Authenticate and get a token'
       tags:
@@ -183,6 +183,34 @@ paths:
           description: 'Wrong Runnername or Key'
         '500':
           description: 'Internal Server Error'
+          
+  /runner/connect:
+    post:
+      summary: 'Authenticate and get a token'
+      tags:
+        - Runner
+      operationId: ConnectRunner
+      deprecated: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConnectRunnerRequest'
+        description: 'Autenticate with Runnername, a Key then get a Runner token'
+        required: true
+      responses:
+        '200':
+          description: 'OK'
+          headers:
+            Authorization:
+              description: 'Bearer {token}'
+              schema:
+                type: string
+        '403':
+          description: 'Wrong Runnername or Key'
+        '500':
+          description: 'Internal Server Error'
+
       
     
 ################
@@ -472,7 +500,7 @@ paths:
           schema:
             type: string
             default: 'Bearer {token}'
-          description: 'A Runner token is required'
+          description: 'A Runner or Admin token is required'
         - in: path
           name: analysisId
           schema:
@@ -504,7 +532,7 @@ paths:
       tags:
         - AnalysisTypes
       operationId: GetAnalysisTypes
-      deprecated: false
+      deprecated: true
       parameters:
         - name: Authorization
           in: header
@@ -529,7 +557,7 @@ paths:
       tags:
         - AnalysisTypes
       operationId: CreateAnalysisType
-      deprecated: false
+      deprecated: true
       parameters:
         - name: Authorization
           in: header
@@ -560,7 +588,7 @@ paths:
       tags:
         - AnalysisTypes
       operationId: DeleteAnalysisType
-      deprecated: false
+      deprecated: true
       parameters:
         - name: Authorization
           in: header
